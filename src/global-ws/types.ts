@@ -4,3 +4,7 @@ import { Socket } from "socket.io";
 export type SocketWithUser = Socket & {
   user: Omit<User, "password">;
 };
+
+export type CreateFriendRequestDto = {
+  email: string;
+};

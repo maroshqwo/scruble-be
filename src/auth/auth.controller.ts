@@ -22,11 +22,12 @@ export class AuthController {
 
   @Post("register")
   async register(@Request() req: RequestWithBody) {
-    return await this.authService.register(req.body);
+    await this.authService.register(req.body);
+    return await this.authService.login(req.body);
   }
 
-  @Get("")
   @UseGuards(JwtAuthGuard)
+  @Get("")
   async getUser(@Request() req: RequestWithUser) {
     const res = await this.userService.findOne(req.user.id);
     return _.omit(res, "password");

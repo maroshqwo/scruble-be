@@ -2,9 +2,10 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { Socket } from "socket.io";
 import { SocketWithUser } from "./types";
 import { User } from "@prisma/client";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 
 export class GlobalService {
-  sockets: { [key: string]: Socket } = {};
+  sockets: { [key: string]: SocketWithUser } = {};
   userSockets: { [key: string]: string[] } = {};
 
   constructor(private readonly prisma: PrismaService) {
@@ -12,12 +13,35 @@ export class GlobalService {
     this.userSockets = {};
   }
 
-  connect(socket: Socket, user: User) {
-    this.sockets[socket.id] = socket;
-    const userSockets = this.userSockets[user.id] || [];
+  async hello(message: string) {
+    const userSocket = this.getSocket(2);
+
+    console.log(message);
+  }
+
+  // FRIEND REQUESTS
+
+  async getUserSocket(userId: number): Promise<SocketWithUser | undefined> {
+    return this.getSocket(userId);
+  }
+
+  async sendToUser(userId: number, event: string, data: any) {
+    const userSocket = this.getSocket(userId);
+    if (!userSocket) return;
+    userSocket.emit(event, data);
+  }
+
+  getSocket(userId: number): SocketWithUser | undefined {
+    return this.sockets[userId];
+  }
+
+  connect(socket: SocketWithUser) {
+    this.sockets[socket.user.id] = socket;
+    /*const userSockets = this.userSockets[socket.user.id] || [];
     userSockets.push(socket.id);
-    this.userSockets[user.id] = userSockets;
-    console.log("Connected: ", socket.id);
+    this.userSockets[socket.user.id] = userSockets;
+    console.log(this.userSockets);*/
+    console.log(`Connected: ${socket.id} - ${socket.user.email}`);
   }
 
   disconnect(socket: Socket) {

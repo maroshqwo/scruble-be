@@ -9,3 +9,13 @@ export type UserRegisterDto = {
   name: string;
   handle: string;
 };
+
+export type UserUpdateDto = {
+  email?: string;
+  name?: string;
+  handle?: string;
+};
+
+export type FriendRequestDto = {
+  email: string;
+};

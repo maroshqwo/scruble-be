@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -16,6 +17,54 @@ model User {
   handle    String     @unique
   name  String
   password  String
+  invitesSent Invite[] @relation("sender")
+  invitesReceived Invite[] @relation("recipient")
+  friends_1 Friend[] @relation("user_1")
+  friends_2 Friend[] @relation("user_2")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum InviteType {
+  FRIEND
+  GAME
+  CLAN
+}
+
+enum StatusType {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+model Invite {
+  id        Int        @id @default(autoincrement())
+
+  recipientId Int
+  recipient User      @relation(name: "recipient", fields: [recipientId], references: [id])
+
+  senderId Int
+  sender  User      @relation(name: "sender", fields: [senderId], references: [id])
+
+  gameId Int?
+  
+  type InviteType
+  status StatusType
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Friend {
+  id        Int        @id @default(autoincrement())
+
+  userId_1 Int
+  user_1 User      @relation(name: "user_1", fields: [userId_1], references: [id])
+
+  userId_2 Int
+  user_2 User      @relation(name: "user_2", fields: [userId_2], references: [id])
+
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }

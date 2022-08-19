@@ -1,7 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { UserRegisterDto } from "./types";
+import { UserRegisterDto, UserUpdateDto } from "./types";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from "bcrypt";
+import { User } from "@prisma/client";
+import * as _ from "lodash";
+import { CreateFriendRequestDto } from "src/global-ws/types";
+import { UserWithoutPassword } from "src/auth/types";
 
 @Injectable()
 export class UsersService {
@@ -42,6 +46,17 @@ export class UsersService {
     return this.prisma.user.create({
       data: { ...dto, password: hash },
     });
+  }
+
+  async update(dto: UserUpdateDto, user: User) {
+    if (!user) throw new BadRequestException("User not found");
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        ...dto,
+      },
+    });
+    return _.omit(updatedUser, "password");
   }
 
   private hashPassword(password: string) {
